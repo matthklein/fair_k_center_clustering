@@ -12,4 +12,4 @@ If you want to obtain the boxplots based on 50 runs, say, then run
 
 Similarly, in order to reproduce the boxplots of the experiments of Figures 5 and 6 on the Adult data set, run
 
-> python experiments_adult_data_set.py
+> python experiments_adult_data_set.py 50
