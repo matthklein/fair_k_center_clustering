@@ -14,7 +14,7 @@ If you want to obtain the boxplots based on 50 runs, say, then run
 python experiments_artificial_data.py 50
 ```
 
-Similarly in order to reproduce the boxplots of the experiments of Figures 5 and 6 on the Adult data set, run
+Similarly, in order to reproduce the boxplots of the experiments of Figures 5 and 6 on the Adult data set, run
 
 ```
 python experiments_adult_data_set.py 50
