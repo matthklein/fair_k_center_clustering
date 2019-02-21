@@ -19,3 +19,9 @@ Similarly, in order to reproduce the boxplots of the experiments of Figures 5 an
 ```
 python experiments_adult_data_set.py 50
 ```
+
+If you want to compare our algorithm to the algorithm for the matroid center problem by Chen et al. (https://arxiv.org/abs/1301.0745), you need to have SageMath (http://www.sagemath.org/) installed on your system. Then simply run
+
+```
+sage -python experiments_matroid_center.py 50
+```
