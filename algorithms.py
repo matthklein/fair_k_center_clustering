@@ -8,10 +8,13 @@ import itertools
 def fair_k_center_exact(dmat,sexes,nr_centers_per_sex,given_centers):
     '''Exhaustive search to exactly solve the fair k-center problem (2) --- only works for small problem instances.
 
+    INPUT:
     dmat ... distance matrix of size nxn
     sexes ... integer-vector of length n with entries in 0,...,m-1, where m is the number of groups
     nr_centers_per_sex ... integer-vector of length m with entries in 0,...,k and sum over entries equaling k
-    given centers ... integer-vector with entries in 0,...,n-1'''
+    given_centers ... integer-vector with entries in 0,...,n-1
+
+    RETURNS: (optimal centers, clustering, optimal fair k-center cost)'''
 
 
     n = dmat.shape[0]
@@ -35,7 +38,6 @@ def fair_k_center_exact(dmat,sexes,nr_centers_per_sex,given_centers):
         else:
             curr_cost = np.inf
 
-
         if curr_cost<cost:
             cost = curr_cost
             best_choice = cluster_centers.copy()
@@ -51,9 +53,12 @@ def fair_k_center_exact(dmat,sexes,nr_centers_per_sex,given_centers):
 def k_center_greedy_with_given_centers(dmat,k,given_centers):
     '''Implementation of Algorithm 1.
 
+    INPUT:
     dmat ... distance matrix of size nxn
     k ... integer smaller than n
-    given centers ... integer-vector with entries in 0,...,n-1'''
+    given_centers ... integer-vector with entries in 0,...,n-1
+
+    RETURNS: approx. optimal centers'''
 
 
     n=dmat.shape[0]
@@ -87,10 +92,13 @@ def k_center_greedy_with_given_centers(dmat,k,given_centers):
 def fair_k_center_APPROX(dmat,sexes,nr_centers_per_sex,given_centers):
     '''Implementation of Algorithm 4.
 
+    INPUT:
     dmat ... distance matrix of size nxn
     sexes ... integer-vector of length n with entries in 0,...,m-1, where m is the number of groups
     nr_centers_per_sex ... integer-vector of length m with entries in 0,...,k and sum over entries equaling k
-    given centers ... integer-vector with entries in 0,...,n-1'''
+    given_centers ... integer-vector with entries in 0,...,n-1
+
+    RETURNS: approx. optimal centers'''
 
 
     n = dmat.shape[0]
@@ -138,6 +146,7 @@ def fair_k_center_APPROX(dmat,sexes,nr_centers_per_sex,given_centers):
                                     nr_centers_per_sex[G],np.arange(new_data_set.size-new_given_centers.size,new_data_set.size))
 
 
+
             new_given_centersT_additional= np.array([],dtype=int)
             for ell in np.setdiff1d(np.arange(m),G):
                 if np.sum(sexes[new_given_centersT]==ell)<nr_centers_per_sex[ell]:
@@ -160,10 +169,13 @@ def fair_k_center_APPROX(dmat,sexes,nr_centers_per_sex,given_centers):
 def swapping_graph(partition,centers,sexes,nr_centers_per_sex):
     '''Implementation of Algorithm 3.
 
+    INPUT:
     partition ... integer-vector of length n with entries in 0 ... k-1
     centers ... integer-vector of length k with entries in 0 ... n-1
     sexes ... integer-vector of length n with entries in 0 ... m-1
-    nr_centers_per_sex ... integer-vector of length m with entries in 0,...,k and sum over entries equaling k'''
+    nr_centers_per_sex ... integer-vector of length m with entries in 0,...,k and sum over entries equaling k
+
+    RETURNS: (G, swapped centers)'''
 
 
     n = partition.size
@@ -175,18 +187,19 @@ def swapping_graph(partition,centers,sexes,nr_centers_per_sex):
     for ell in np.arange(k):
         CURRENT_nr_clusters_per_sex[sexes[centers[ell]]] += 1
 
-    sex_of_assigned_center = sexes[partition]
+
+    sex_of_assigned_center = sexes[centers[partition]]
     Adja = np.zeros((m, m))
     for ell in np.arange(n):
         Adja[sex_of_assigned_center[ell],sexes[ell]] = 1
 
-    dmat,predec = scipy.sparse.csgraph.shortest_path(Adja, directed=True, return_predecessors=True)
+    dmat_gr,predec = scipy.sparse.csgraph.shortest_path(Adja, directed=True, return_predecessors=True)
 
     is_there_a_path=0
     for ell in np.arange(m):
         for zzz in np.arange(m):
             if ((CURRENT_nr_clusters_per_sex[ell]>nr_centers_per_sex[ell]) and (CURRENT_nr_clusters_per_sex[zzz]<nr_centers_per_sex[zzz])):
-                if dmat[ell,zzz]!=np.inf:
+                if dmat_gr[ell,zzz]!=np.inf:
                     path = np.array([zzz])
                     while path[0]!=ell:
                         path = np.hstack((predec[ell,path[0]],path))
@@ -197,7 +210,7 @@ def swapping_graph(partition,centers,sexes,nr_centers_per_sex):
 
 
 
-    while (is_there_a_path) and (np.sum(CURRENT_nr_clusters_per_sex==nr_centers_per_sex)<m):
+    while (is_there_a_path):
 
         for hhh in np.arange(path.size - 1):
             for ell in np.arange(n):
@@ -213,13 +226,13 @@ def swapping_graph(partition,centers,sexes,nr_centers_per_sex):
         for ell in np.arange(n):
             Adja[sex_of_assigned_center[ell], sexes[ell]] = 1
 
-        dmat, predec = scipy.sparse.csgraph.shortest_path(Adja, directed=True, return_predecessors=True)
+        dmat_gr, predec = scipy.sparse.csgraph.shortest_path(Adja, directed=True, return_predecessors=True)
 
         is_there_a_path = 0
         for ell in np.arange(m):
             for zzz in np.arange(m):
                 if ((CURRENT_nr_clusters_per_sex[ell] > nr_centers_per_sex[ell]) and (CURRENT_nr_clusters_per_sex[zzz] < nr_centers_per_sex[zzz])):
-                    if dmat[ell, zzz] != np.inf:
+                    if dmat_gr[ell, zzz] != np.inf:
                         path = np.array([zzz])
                         while path[0] != ell:
                             path = np.hstack((predec[ell, path[0]], path))
@@ -230,17 +243,15 @@ def swapping_graph(partition,centers,sexes,nr_centers_per_sex):
 
 
 
-
     if sum(CURRENT_nr_clusters_per_sex==nr_centers_per_sex)==m:
-        return np.array([]),centers
+        return np.array([]), centers
     else:
 
         G = np.where(CURRENT_nr_clusters_per_sex > nr_centers_per_sex)[0]
         for ell in np.arange(m):
             for zzz in np.arange(m):
-                if (((dmat[ell, zzz] != np.inf) and np.isin(ell, G)) and (not np.isin(zzz, G))):
+                if (((dmat_gr[ell, zzz] != np.inf) and np.isin(ell, G)) and (not np.isin(zzz, G))):
                     G = np.hstack((G, zzz))
-
 
         return G,centers
 ########################################################################################################################
@@ -251,10 +262,13 @@ def swapping_graph(partition,centers,sexes,nr_centers_per_sex):
 def heuristic_greedy_on_each_group(dmat,sexes,nr_centers_per_sex,given_centers):
     '''Implementation of Heuristic A as described in Section 5.3.
 
+    INPUT:
     dmat ... distance matrix of size nxn
     sexes ... integer-vector of length n with entries in 0,...,m-1, where m is the number of groups
     nr_centers_per_sex ... integer-vector of length m with entries in 0,...,k and sum over entries equaling k
-    given centers ... integer-vector with entries in 0,...,n-1'''
+    given_centers ... integer-vector with entries in 0,...,n-1
+
+    RETURNS: heuristically chosen centers'''
 
 
     m = nr_centers_per_sex.size
@@ -277,12 +291,15 @@ def heuristic_greedy_on_each_group(dmat,sexes,nr_centers_per_sex,given_centers):
 
 ########################################################################################################################
 def heuristic_greedy_till_constraint_is_satisfied(dmat,sexes,nr_centers_per_sex,given_centers):
-    '''Implementation of Heursitic B as described in Section 5.3.
+    '''Implementation of Heuristic B as described in Section 5.3.
 
+    INPUT:
     dmat ... distance matrix of size nxn
     sexes ... integer-vector of length n with entries in 0,...,m-1, where m is the number of groups
     nr_centers_per_sex ... integer-vector of length m with entries in 0,...,k and sum over entries equaling k
-    given centers ... integer-vector with entries in 0,...,n-1
+    given_centers ... integer-vector with entries in 0,...,n-1
+
+    RETURNS: heuristically chosen centers
 
     SINCE WE DO NOT REQUIRE THE GENERAL CASE IN OUR EXPERIMENTS AND IT ALLOWS FOR A SLIGHTLY SIMPLER CODE,
     HERE WE ASSUME THAT EITHER length(given_centers)>0 OR nr_centers_per_sex only[i]>0 FOR ALL i'''

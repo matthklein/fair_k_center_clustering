@@ -253,14 +253,6 @@ def exp_comparison_greedy_strategy_artificial_data(nr_of_runs):
         plt.xticks([1], ['Unfair Greedy'], fontsize=12)
         plt.ylabel('|# centers in S$_1$ - # centers in S$_2$|', fontsize=14)
 
-        fig.tight_layout()
-
-        st.set_y(0.95)
-        fig.subplots_adjust(top=0.85)
-
-        fig.savefig('exp_comparison_greedy_strategy_artificial_data.pdf', bbox_inches='tight')
-        plt.close()
-
     else:
         data = [plot_data[:, ccc] for ccc in np.arange(2)]
 
@@ -277,12 +269,11 @@ def exp_comparison_greedy_strategy_artificial_data(nr_of_runs):
         plt.xticks([1], ['Unfair Greedy'], fontsize=12)
         plt.ylabel('max$_{i,j}$ |# centers in S$_i$ - # centers in S$_j$|', fontsize=13)
 
-        fig.tight_layout()
-
-        st.set_y(0.95)
-        fig.subplots_adjust(top=0.85)
-        fig.savefig('exp_comparison_greedy_strategy_artificial_data.pdf', bbox_inches='tight')
-        plt.close()
+    fig.tight_layout()
+    st.set_y(0.95)
+    fig.subplots_adjust(top=0.85)
+    fig.savefig('exp_comparison_greedy_strategy_artificial_data.pdf', bbox_inches='tight')
+    plt.close()
 
 
 
