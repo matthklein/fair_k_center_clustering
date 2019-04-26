@@ -25,3 +25,10 @@ If you want to compare our algorithm to the algorithm for the matroid center pro
 ```
 sage -python experiments_matroid_center.py 50
 ```
+
+The code has been tested with the following software versions:
+- Python 2.7.10
+- Numpy 1.16.2
+- Scipy 1.1.0
+- Pandas 0.23.0
+- SageMath 8.2
